@@ -1,0 +1,6 @@
+[submodule "lib/0g-docs"]
+	path = lib/0g-docs
+	url = https://github.com/0gfoundation/0g-doc
+[submodule "lib/mastra"]
+	path = lib/mastra
+	url = https://github.com/mastra-ai/mastra
