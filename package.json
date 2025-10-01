@@ -1,0 +1,27 @@
+{
+  "name": "0g-mcp-server",
+  "version": "0.1.0",
+  "description": "MCP server for accessing 0g.ai documentation and code examples",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": "dist/stdio.js",
+  "private": true,
+  "scripts": {
+    "prepare-docs": "PREPARE=true bun src/prepare-docs/prepare.ts",
+    "build": "bun build src/stdio.ts --outdir dist --target node && bun build src/index.ts --outdir dist --target node",
+    "start": "bun src/stdio.ts",
+    "dev": "REBUILD_DOCS_ON_START=true bun --watch src/stdio.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@mastra/mcp": "^0.13.2",
+    "gray-matter": "^4.0.3",
+    "zod": "^4.1.11"
+  }
+}
