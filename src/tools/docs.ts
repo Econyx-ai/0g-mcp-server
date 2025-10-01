@@ -6,9 +6,30 @@ import { fromProjectRoot, getMatchingPaths } from '../utils/file-utils.js';
 
 const docsBaseDir = fromProjectRoot('.docs/raw/');
 
+// Configuration for content limits
+const MAX_FILE_SIZE = 50000; // 50KB per file
+const MAX_TOTAL_DIR_SIZE = 100000; // 100KB total for directory content
+const MAX_FILES_PER_DIR = 5; // Maximum files to include full content
+
 type ReadMdResult =
-  | { found: true; content: string; isSecurityViolation: boolean }
+  | { found: true; content: string; isSecurityViolation: boolean; truncated?: boolean }
   | { found: false; isSecurityViolation: boolean };
+
+// Helper function to truncate content if too large
+function truncateContent(content: string, maxLength: number): { content: string; wasTruncated: boolean } {
+  if (content.length <= maxLength) {
+    return { content, wasTruncated: false };
+  }
+
+  const truncated = content.substring(0, maxLength);
+  const lastNewline = truncated.lastIndexOf('\n');
+  const finalContent = lastNewline > 0 ? truncated.substring(0, lastNewline) : truncated;
+
+  return {
+    content: finalContent + `\n\n... [Content truncated - ${content.length - finalContent.length} characters omitted. Request specific file for full content.]`,
+    wasTruncated: true
+  };
+}
 
 // Helper function to list contents of a directory
 async function listDirContents(dirPath: string): Promise<{ dirs: string[]; files: string[] }> {
@@ -51,6 +72,11 @@ async function readMdContent(docPath: string, queryKeywords: string[]): Promise<
 
     if (stats.isDirectory()) {
       const { dirs, files } = await listDirContents(fullPath);
+
+      // Limit number of files with full content
+      const filesToInclude = files.slice(0, MAX_FILES_PER_DIR);
+      const filesOmitted = files.slice(MAX_FILES_PER_DIR);
+
       const dirListing = [
         `Directory contents of ${docPath}:`,
         '',
@@ -62,29 +88,67 @@ async function readMdContent(docPath: string, queryKeywords: string[]): Promise<
         '',
         '---',
         '',
-        'Contents of all files in this directory:',
+        `Contents of files (showing ${filesToInclude.length} of ${files.length}):`,
         '',
       ].join('\n');
 
-      // Append all file contents
+      // Append file contents with size limits
       let fileContents = '';
-      for (const file of files) {
+      let totalSize = 0;
+      let wasTruncated = false;
+
+      for (const file of filesToInclude) {
         const filePath = path.join(fullPath, file);
-        const content = await fs.readFile(filePath, 'utf-8');
+        let content = await fs.readFile(filePath, 'utf-8');
+
+        // Truncate individual file if needed
+        const { content: truncatedContent, wasTruncated: fileTruncated } = truncateContent(content, MAX_FILE_SIZE);
+        content = truncatedContent;
+        wasTruncated = wasTruncated || fileTruncated;
+
+        // Check total size limit
+        if (totalSize + content.length > MAX_TOTAL_DIR_SIZE) {
+          const remaining = MAX_TOTAL_DIR_SIZE - totalSize;
+          if (remaining > 1000) {
+            const { content: finalContent } = truncateContent(content, remaining);
+            fileContents += `\n\n# ${file}\n\n${finalContent}`;
+          }
+          wasTruncated = true;
+          break;
+        }
+
         fileContents += `\n\n# ${file}\n\n${content}`;
+        totalSize += content.length;
       }
 
-      // Add content-based suggestions when query keywords are provided and path is a directory
-      const contentBasedSuggestions = await getMatchingPaths(docPath, queryKeywords, docsBaseDir);
+      // Add notice about omitted files
+      if (filesOmitted.length > 0) {
+        fileContents += `\n\n---\n\n**Note**: ${filesOmitted.length} additional file(s) not shown: ${filesOmitted.join(', ')}\nRequest specific files directly for their full content.`;
+        wasTruncated = true;
+      }
 
+      // Add content-based suggestions
+      const contentBasedSuggestions = await getMatchingPaths(docPath, queryKeywords, docsBaseDir);
       const suggestions = ['---', '', contentBasedSuggestions, ''].join('\n');
 
-      return { found: true, content: dirListing + fileContents + suggestions, isSecurityViolation: false };
+      return {
+        found: true,
+        content: dirListing + fileContents + suggestions,
+        isSecurityViolation: false,
+        truncated: wasTruncated
+      };
     }
 
-    // If it's a file, just read it
-    const content = await fs.readFile(fullPath, 'utf-8');
-    return { found: true, content, isSecurityViolation: false };
+    // If it's a file, read and potentially truncate it
+    let content = await fs.readFile(fullPath, 'utf-8');
+    const { content: finalContent, wasTruncated } = truncateContent(content, MAX_FILE_SIZE);
+
+    return {
+      found: true,
+      content: finalContent,
+      isSecurityViolation: false,
+      truncated: wasTruncated
+    };
   } catch (error: any) {
     void logger.error(`Failed to read MD content: ${fullPath}`, error);
     if (error.code === 'ENOENT') {
@@ -176,7 +240,13 @@ export const docsTool = {
     Provide code examples so the user understands.
     If you build a URL from the path, only paths ending in .md or .mdx exist.
     IMPORTANT: Be concise with your answers. The user will ask for more info.
-    When displaying results, always mention which file path contains the information (e.g., 'Found in "path/to/file.md"') so users know where this documentation lives.`,
+    When displaying results, always mention which file path contains the information (e.g., 'Found in "path/to/file.md"') so users know where this documentation lives.
+
+    Note: To optimize context usage:
+    - Directory requests show up to 5 files with content
+    - Individual files are limited to 50KB
+    - Total directory content is limited to 100KB
+    - If content is truncated, request specific files directly for full content`,
   parameters: docsInputSchema,
   execute: async (args: DocsInput) => {
     void logger.debug('Executing 0gDocs tool', { args });

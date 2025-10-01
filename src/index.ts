@@ -5,6 +5,11 @@ import { logger, createLogger } from './utils/logger.js';
 import { prepare } from './prepare-docs/prepare.js';
 import { docsTool } from './tools/docs.js';
 import { examplesTool } from './tools/examples.js';
+import { storageUploadTool } from './tools/storage/upload.js';
+import { storageDownloadTool } from './tools/storage/download.js';
+import { storageNodesTool } from './tools/storage/nodes.js';
+import { kvSetTool } from './tools/storage/kv-set.js';
+import { kvGetTool } from './tools/storage/kv-get.js';
 import { fromProjectRoot } from './utils/file-utils.js';
 
 let server: MCPServer;
@@ -25,6 +30,11 @@ server = new MCPServer({
   tools: {
     '0gDocs': docsTool,
     '0gExamples': examplesTool,
+    '0gStorageUpload': storageUploadTool,
+    '0gStorageDownload': storageDownloadTool,
+    '0gStorageNodes': storageNodesTool,
+    '0gKvSet': kvSetTool,
+    '0gKvGet': kvGetTool,
   },
 });
 

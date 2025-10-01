@@ -4,3 +4,9 @@
 [submodule "lib/mastra"]
 	path = lib/mastra
 	url = https://github.com/mastra-ai/mastra
+[submodule "lib/0g-storage-node"]
+	path = lib/0g-storage-node
+	url = https://github.com/0gfoundation/0g-storage-node
+[submodule "lib/0g-storage-client"]
+	path = lib/0g-storage-client
+	url = https://github.com/0gfoundation/0g-storage-client
