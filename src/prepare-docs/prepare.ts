@@ -22,6 +22,10 @@ const DOCS_SOURCES = [
   {
     source: fromProjectRoot('lib/0g-serving-user-broker'),
     dest: fromProjectRoot('.docs/raw/serving-user-broker')
+  },
+  {
+    source: fromProjectRoot('docs/0g-knowledge-base'),
+    dest: fromProjectRoot('.docs/raw/knowledge-base')
   }
 ];
 
@@ -77,6 +81,8 @@ export async function prepare() {
         skipDirs = ['.github', '.git'];
       } else if (sourceName === '0g-serving-user-broker') {
         skipDirs = ['docs', 'lib.commonjs', 'lib.esm', 'cli.commonjs', 'types', 'binary', 'token.counter', '.github', '.git'];
+      } else if (sourceName === '0g-knowledge-base') {
+        skipDirs = []; // Include all custom documentation
       }
 
       await copyDir(source, dest, skipDirs);

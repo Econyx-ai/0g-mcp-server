@@ -10,6 +10,7 @@ import { storageDownloadTool } from './tools/storage/download.js';
 import { storageNodesTool } from './tools/storage/nodes.js';
 import { kvSetTool } from './tools/storage/kv-set.js';
 import { kvGetTool } from './tools/storage/kv-get.js';
+import { listServicesTool } from './tools/compute/list-services.js';
 import { fromProjectRoot } from './utils/file-utils.js';
 
 let server: MCPServer;
@@ -35,6 +36,7 @@ server = new MCPServer({
     '0gStorageNodes': storageNodesTool,
     '0gKvSet': kvSetTool,
     '0gKvGet': kvGetTool,
+    '0gComputeListServices': listServicesTool,
   },
 });
 

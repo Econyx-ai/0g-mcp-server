@@ -10,12 +10,23 @@ Model Context Protocol (MCP) server for accessing [0g.ai](https://0g.ai) documen
   - File upload/download
   - Storage node information
   - Key-value store operations
+- **0G Compute Network Tools**: Live integration with 0G Compute Network
+  - List available AI services (inference & fine-tuning)
+  - Service discovery with detailed pricing
+  - Provider verification status (TEE support)
+  - Real-time service availability
 - **0G Compute Network Documentation**: Access compute layer documentation
   - Inference SDK guides and complete examples
   - Fine-tuning provider setup
   - CLI usage examples
   - Broker architecture and design (provider & user brokers)
   - TypeScript SDK interface documentation
+- **Knowledge Base with Mermaid Diagrams**: Custom architecture documentation
+  - System architecture diagrams
+  - Sequence diagrams for complete flows
+  - State transition diagrams
+  - Component interaction diagrams
+  - LLM-readable Mermaid format for better understanding
 - Automatic documentation syncing via git submodule
 - Built-in logging and error handling
 - Compatible with Claude Code, Cursor, and other MCP clients
@@ -266,6 +277,64 @@ Retrieve a value from 0G Storage KV store by key.
 }
 ```
 
+### Compute Tools
+
+#### 0gComputeListServices
+
+List all available AI services on the 0G Compute Network.
+
+**Parameters:**
+- `evmRpc` (string, optional): EVM RPC endpoint (default: testnet)
+- `contractAddress` (string, optional): Serving contract address (uses default if not provided)
+
+**Returns:**
+- `success`: Boolean indicating success
+- `count`: Number of services available
+- `services`: Array of service objects with:
+  - `provider`: Provider wallet address
+  - `model`: AI model name (e.g., "phala/gpt-oss-120b")
+  - `serviceType`: Type of service (e.g., "chatbot")
+  - `endpoint`: Service URL
+  - `pricing`: Object with input/output prices
+  - `verifiability`: Verification type (e.g., "TeeML" for TEE support)
+  - `lastUpdated`: ISO timestamp
+- `formatted`: Human-readable table format
+- `raw`: Raw service data from contract
+
+**Example:**
+```typescript
+{
+  // List all services with default settings
+}
+```
+
+**Example Output:**
+```
+════════════════════════════════════════════════════════════════════════════════
+  0G COMPUTE NETWORK - AVAILABLE SERVICES
+════════════════════════════════════════════════════════════════════════════════
+
+┌─ Service 1
+│
+├─ Provider Address: 0xf07240Efa67755B5311bc75784a061eDB47165Dd
+├─ Model: phala/gpt-oss-120b
+├─ Service Type: chatbot
+├─ Endpoint: http://50.145.48.92:30081
+│
+├─ Pricing:
+│  ├─ Input Price:  1.00e-7 A0GI per token
+│  └─ Output Price: 4.00e-7 A0GI per token
+│
+├─ Verifiability: TeeML
+│  └─ Type: TeeML (Trusted Execution Environment)
+│
+├─ Last Updated: 2025-09-27T09:34:27.000Z
+└─
+
+Total Services: 4
+════════════════════════════════════════════════════════════════════════════════
+```
+
 ## Project Structure
 
 ```
@@ -274,16 +343,19 @@ Retrieve a value from 0G Storage KV store by key.
 │   ├── index.ts              # Main server entry point
 │   ├── stdio.ts              # Stdio wrapper for MCP
 │   ├── config/               # Configuration
-│   │   └── storage.ts        # Storage tools configuration
+│   │   ├── storage.ts        # Storage tools configuration
+│   │   └── compute.ts        # Compute tools configuration
 │   ├── tools/                # MCP tool implementations
 │   │   ├── docs.ts           # 0gDocs tool
 │   │   ├── examples.ts       # 0gExamples tool
-│   │   └── storage/          # Storage SDK tools
-│   │       ├── upload.ts     # 0gStorageUpload tool
-│   │       ├── download.ts   # 0gStorageDownload tool
-│   │       ├── nodes.ts      # 0gStorageNodes tool
-│   │       ├── kv-set.ts     # 0gKvSet tool
-│   │       └── kv-get.ts     # 0gKvGet tool
+│   │   ├── storage/          # Storage SDK tools
+│   │   │   ├── upload.ts     # 0gStorageUpload tool
+│   │   │   ├── download.ts   # 0gStorageDownload tool
+│   │   │   ├── nodes.ts      # 0gStorageNodes tool
+│   │   │   ├── kv-set.ts     # 0gKvSet tool
+│   │   │   └── kv-get.ts     # 0gKvGet tool
+│   │   └── compute/          # Compute Network tools
+│   │       └── list-services.ts  # 0gComputeListServices tool
 │   ├── prepare-docs/         # Documentation processing
 │   │   └── prepare.ts        # Doc preparation logic
 │   └── utils/
@@ -297,6 +369,9 @@ Retrieve a value from 0G Storage KV store by key.
 │   ├── 0g-serving-user-broker/ # 0g compute network user SDK (submodule)
 │   └── mastra/               # Mastra reference (submodule)
 ├── docs/                     # Project documentation
+│   ├── 0g-knowledge-base/    # Custom knowledge base with Mermaid diagrams
+│   │   └── compute/          # Compute layer architecture docs
+│   │       └── 0g-serving-broker.md  # Broker system diagrams
 │   └── requirements.md       # Requirements specification
 ├── .docs/                    # Prepared documentation (generated)
 │   └── raw/                  # Copied markdown files
@@ -318,6 +393,49 @@ cd ../..
 # Rebuild documentation index
 bun run prepare-docs
 ```
+
+### Adding Custom Documentation
+
+To add your own architecture diagrams, guides, or documentation:
+
+1. Create markdown files in `docs/0g-knowledge-base/`:
+   ```bash
+   # Example structure
+   docs/0g-knowledge-base/
+   ├── compute/
+   │   └── your-diagram.md
+   ├── storage/
+   │   └── your-guide.md
+   └── guides/
+       └── best-practices.md
+   ```
+
+2. Include Mermaid diagrams in your markdown files:
+   ````markdown
+   ## System Architecture
+
+   ```mermaid
+   graph TB
+       User[User] --> Broker[Broker]
+       Broker --> Contract[Smart Contract]
+   ```
+   ````
+
+3. Run prepare-docs to make them accessible:
+   ```bash
+   bun run prepare-docs
+   ```
+
+4. Access via MCP tools:
+   ```typescript
+   // Via 0gDocs tool
+   paths: ["knowledge-base/compute/your-diagram.md"]
+   ```
+
+**Benefits:**
+- Mermaid diagrams are LLM-readable (unlike PNG images)
+- Version controlled alongside code
+- Accessible to AI agents via MCP for better guidance
 
 ### Scripts
 
@@ -398,6 +516,38 @@ OG_PRIVATE_KEY=0x1234567890abcdef...
 - Indexer RPC: `https://indexer-storage-mainnet.0g.ai`
 - KV URL: `http://mainnet-kv.0g.ai:6789`
 - Flow Contract: TBD
+
+### Compute Tools Configuration
+
+The compute tools use the same configuration system as storage tools:
+
+**Available Environment Variables:**
+
+- `OG_NETWORK` (string, default: `testnet`)
+  - Network selection: `testnet` or `mainnet`
+  - Shared with storage tools
+
+- `OG_EVM_RPC` (string, optional)
+  - Custom EVM RPC endpoint
+  - Shared with storage tools
+
+- `OG_SERVING_CONTRACT` (string, optional)
+  - Custom Serving contract address
+  - Overrides SDK default
+
+**Example `.env` file:**
+```bash
+# Network selection (affects both storage and compute)
+OG_NETWORK=testnet
+
+# Shared EVM RPC endpoint
+OG_EVM_RPC=https://evmrpc-testnet.0g.ai
+
+# Optional: Custom serving contract
+# OG_SERVING_CONTRACT=0x1234567890abcdef...
+```
+
+**Note:** Compute tools require **no private key** for read-only operations like listing services. They create a temporary wallet internally for contract reads.
 
 ## References
 
