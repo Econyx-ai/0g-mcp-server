@@ -10,6 +10,12 @@ Model Context Protocol (MCP) server for accessing [0g.ai](https://0g.ai) documen
   - File upload/download
   - Storage node information
   - Key-value store operations
+- **0G Compute Network Documentation**: Access compute layer documentation
+  - Inference SDK guides and complete examples
+  - Fine-tuning provider setup
+  - CLI usage examples
+  - Broker architecture and design (provider & user brokers)
+  - TypeScript SDK interface documentation
 - Automatic documentation syncing via git submodule
 - Built-in logging and error handling
 - Compatible with Claude Code, Cursor, and other MCP clients
@@ -287,6 +293,8 @@ Retrieve a value from 0G Storage KV store by key.
 │   ├── 0g-docs/              # 0g documentation (submodule)
 │   ├── 0g-storage-node/      # 0g storage node docs (submodule)
 │   ├── 0g-storage-client/    # 0g Go storage client (submodule)
+│   ├── 0g-serving-broker/    # 0g compute network provider broker (submodule)
+│   ├── 0g-serving-user-broker/ # 0g compute network user SDK (submodule)
 │   └── mastra/               # Mastra reference (submodule)
 ├── docs/                     # Project documentation
 │   └── requirements.md       # Requirements specification
@@ -398,6 +406,8 @@ OG_PRIVATE_KEY=0x1234567890abcdef...
 - [0G TypeScript SDK](https://github.com/0gfoundation/0g-ts-sdk)
 - [0G Storage Node](https://github.com/0gfoundation/0g-storage-node)
 - [0G Storage Client (Go)](https://github.com/0gfoundation/0g-storage-client)
+- [0G Serving Provider Broker](https://github.com/0gfoundation/0g-serving-broker)
+- [0G Serving User Broker (SDK)](https://github.com/0gfoundation/0g-serving-user-broker)
 - [Mastra MCP Framework](https://mastra.ai)
 - [Model Context Protocol](https://modelcontextprotocol.io/)
 

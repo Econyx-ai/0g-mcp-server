@@ -10,3 +10,9 @@
 [submodule "lib/0g-storage-client"]
 	path = lib/0g-storage-client
 	url = https://github.com/0gfoundation/0g-storage-client
+[submodule "lib/0g-serving-broker"]
+	path = lib/0g-serving-broker
+	url = https://github.com/0gfoundation/0g-serving-broker
+[submodule "lib/0g-serving-user-broker"]
+	path = lib/0g-serving-user-broker
+	url = https://github.com/0gfoundation/0g-serving-user-broker

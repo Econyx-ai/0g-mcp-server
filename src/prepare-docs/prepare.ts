@@ -14,6 +14,14 @@ const DOCS_SOURCES = [
   {
     source: fromProjectRoot('lib/0g-storage-client'),
     dest: fromProjectRoot('.docs/raw/storage-client')
+  },
+  {
+    source: fromProjectRoot('lib/0g-serving-broker'),
+    dest: fromProjectRoot('.docs/raw/serving-broker')
+  },
+  {
+    source: fromProjectRoot('lib/0g-serving-user-broker'),
+    dest: fromProjectRoot('.docs/raw/serving-user-broker')
   }
 ];
 
@@ -65,6 +73,10 @@ export async function prepare() {
         skipDirs = ['node', 'common', 'tests', 'scripts', 'run', '.github', '.git', 'version-meld', 'storage-contracts-abis', '.gitbook'];
       } else if (sourceName === '0g-storage-client') {
         skipDirs = ['cmd', 'common', 'contract', 'core', 'gateway', 'indexer', 'kv', 'node', 'transfer', '.github', '.git'];
+      } else if (sourceName === '0g-serving-broker') {
+        skipDirs = ['.github', '.git'];
+      } else if (sourceName === '0g-serving-user-broker') {
+        skipDirs = ['docs', 'lib.commonjs', 'lib.esm', 'cli.commonjs', 'types', 'binary', 'token.counter', '.github', '.git'];
       }
 
       await copyDir(source, dest, skipDirs);
