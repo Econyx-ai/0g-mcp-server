@@ -26,6 +26,14 @@ const DOCS_SOURCES = [
   {
     source: fromProjectRoot('docs/0g-knowledge-base'),
     dest: fromProjectRoot('.docs/raw/knowledge-base')
+  },
+  {
+    source: fromProjectRoot('lib/0g-serving-contract'),
+    dest: fromProjectRoot('.docs/raw/serving-contract')
+  },
+  {
+    source: fromProjectRoot('lib/0g-agent-nft'),
+    dest: fromProjectRoot('.docs/raw/agent-nft')
   }
 ];
 
@@ -48,8 +56,8 @@ async function copyDir(src: string, dest: string, skipDirs: string[] = []) {
     if (entry.isDirectory()) {
       // Recursively copy directories
       await copyDir(srcPath, destPath, skipDirs);
-    } else if (entry.isFile() && (entry.name.endsWith('.mdx') || entry.name.endsWith('.md'))) {
-      // Copy both mdx and md files
+    } else if (entry.isFile() && (entry.name.endsWith('.mdx') || entry.name.endsWith('.md') || entry.name.endsWith('.sol'))) {
+      // Copy mdx, md, and sol files
       await fs.copyFile(srcPath, destPath);
     }
   }
@@ -83,6 +91,10 @@ export async function prepare() {
         skipDirs = ['docs', 'lib.commonjs', 'lib.esm', 'cli.commonjs', 'types', 'binary', 'token.counter', '.github', '.git'];
       } else if (sourceName === '0g-knowledge-base') {
         skipDirs = []; // Include all custom documentation
+      } else if (sourceName === '0g-serving-contract') {
+        skipDirs = ['contracts', 'src', 'test', 'integrate', '.github', '.git', 'node_modules'];
+      } else if (sourceName === '0g-agent-nft') {
+        skipDirs = ['scripts', 'node_modules', 'cache', 'artifacts', 'typechain-types', '.github', '.git'];
       }
 
       await copyDir(source, dest, skipDirs);

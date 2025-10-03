@@ -21,6 +21,19 @@ Model Context Protocol (MCP) server for accessing [0g.ai](https://0g.ai) documen
   - CLI usage examples
   - Broker architecture and design (provider & user brokers)
   - TypeScript SDK interface documentation
+  - **Smart Contract Documentation**: Deep dive into on-chain mechanics
+    - Settlement and ZK-proof verification
+    - Account and service management
+    - Nonce-based replay protection
+    - Refund mechanisms and lock times
+- **0G Agent NFT (iNFT) Documentation**: ERC-7857 standard implementation
+  - Complete EIP-7857 specification for AI Agent NFTs
+  - Private metadata management (models, memory, character definitions)
+  - Verifiable data transfer with TEE/ZKP proofs
+  - Full Solidity contract implementations (AgentNFT, verifiers, interfaces)
+  - Transfer, clone, and authorization mechanisms
+  - Sealed key encryption for secure data access
+  - Reference implementation with proxy patterns
 - **Knowledge Base with Mermaid Diagrams**: Custom architecture documentation
   - System architecture diagrams
   - Sequence diagrams for complete flows
@@ -367,11 +380,15 @@ Total Services: 4
 │   ├── 0g-storage-client/    # 0g Go storage client (submodule)
 │   ├── 0g-serving-broker/    # 0g compute network provider broker (submodule)
 │   ├── 0g-serving-user-broker/ # 0g compute network user SDK (submodule)
+│   ├── 0g-serving-contract/  # 0g compute network smart contracts (submodule)
+│   ├── 0g-agent-nft/         # 0g Agent NFT (iNFT) ERC-7857 implementation (submodule)
 │   └── mastra/               # Mastra reference (submodule)
 ├── docs/                     # Project documentation
 │   ├── 0g-knowledge-base/    # Custom knowledge base with Mermaid diagrams
-│   │   └── compute/          # Compute layer architecture docs
-│   │       └── 0g-serving-broker.md  # Broker system diagrams
+│   │   ├── compute/          # Compute layer architecture docs
+│   │   │   └── 0g-serving-broker.md  # Broker system diagrams
+│   │   └── 0g-agent/         # Agent NFT documentation
+│   │       └── erc-7857.md   # EIP-7857 specification
 │   └── requirements.md       # Requirements specification
 ├── .docs/                    # Prepared documentation (generated)
 │   └── raw/                  # Copied markdown files
@@ -558,6 +575,8 @@ OG_EVM_RPC=https://evmrpc-testnet.0g.ai
 - [0G Storage Client (Go)](https://github.com/0gfoundation/0g-storage-client)
 - [0G Serving Provider Broker](https://github.com/0gfoundation/0g-serving-broker)
 - [0G Serving User Broker (SDK)](https://github.com/0gfoundation/0g-serving-user-broker)
+- [0G Serving Smart Contracts](https://github.com/0gfoundation/0g-serving-contract)
+- [0G Agent NFT (iNFT) - ERC-7857](https://github.com/0gfoundation/0g-agent-nft)
 - [Mastra MCP Framework](https://mastra.ai)
 - [Model Context Protocol](https://modelcontextprotocol.io/)
 
