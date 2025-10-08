@@ -79,7 +79,7 @@ REBUILD_DOCS_ON_START=true bun run start
 Add the server using the Claude CLI:
 
 ```bash
-claude mcp add 0g-docs bun run /home/unquale/workspace/0g-mcp-server/src/stdio.ts
+claude mcp add 0g-docs bun run /path/to/0g-mcp-server/src/stdio.ts
 ```
 
 Or manually add to your MCP configuration:
@@ -89,13 +89,13 @@ Or manually add to your MCP configuration:
   "mcpServers": {
     "0g-docs": {
       "command": "bun",
-      "args": ["run", "/home/unquale/workspace/0g-mcp-server/src/stdio.ts"]
+      "args": ["run", "/path/to/0g-mcp-server/src/stdio.ts"]
     }
   }
 }
 ```
 
-**Note**: Replace `/home/unquale/workspace/0g-mcp-server` with your actual project path.
+**Note**: Replace `/path/to/0g-mcp-server` with your actual project path.
 
 After adding, restart Claude Code or reconnect to the MCP server using:
 ```bash

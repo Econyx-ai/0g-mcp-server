@@ -1,16 +1,4 @@
-## 🎯 **Analyzing 0G AgentNFT Repository**
-
-Let me fetch and analyze the repository to create proper Mermaid diagrams.
-
-Fetched: GitHub - 0gfoundation/0g-agent-nft
-
-Let me fetch the README directly to see the images and contract structure:
-
-Failed to fetch: https://raw.githubusercontent.com/0gfoundation/0g-agent-nft/main/README.md
-
-Searched for “0g-agent-nft ERC7857 contract implementation”
-
-Perfect! Based on the information gathered, let me create comprehensive Mermaid diagrams for the ERC-7857 AgentNFT standard:
+# ERC-7857 iNFT Standard
 
 ## 🎨 **ERC-7857 iNFT Standard: Mermaid Diagrams**
 
