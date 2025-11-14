@@ -137,7 +137,8 @@ export const listServicesTool = {
 
       // Create a dummy wallet for read-only operations
       // We use a random private key since we're only reading from the contract
-      const dummyWallet = ethers.Wallet.createRandom().connect(provider);
+      const randomWallet = ethers.Wallet.createRandom();
+      const dummyWallet = new ethers.Wallet(randomWallet.privateKey, provider);
 
       // Initialize broker
       const broker = await createZGComputeNetworkBroker(
