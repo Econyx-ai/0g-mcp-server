@@ -1,106 +1,114 @@
 
-Default to using Bun instead of Node.js.
+# 0G MCP Server - Development Guide
 
-- Use `bun <file>` instead of `node <file>` or `ts-node <file>`
-- Use `bun test` instead of `jest` or `vitest`
-- Use `bun build <file.html|file.ts|file.css>` instead of `webpack` or `esbuild`
-- Use `bun install` instead of `npm install` or `yarn install` or `pnpm install`
-- Use `bun run <script>` instead of `npm run <script>` or `yarn run <script>` or `pnpm run <script>`
-- Bun automatically loads .env, so don't use dotenv.
+This is a Model Context Protocol (MCP) server for 0G.AI documentation and SDK integration. This project uses Bun and TypeScript.
 
-## APIs
+## Technology Stack
 
-- `Bun.serve()` supports WebSockets, HTTPS, and routes. Don't use `express`.
-- `bun:sqlite` for SQLite. Don't use `better-sqlite3`.
-- `Bun.redis` for Redis. Don't use `ioredis`.
-- `Bun.sql` for Postgres. Don't use `pg` or `postgres.js`.
-- `WebSocket` is built-in. Don't use `ws`.
-- Prefer `Bun.file` over `node:fs`'s readFile/writeFile
-- Bun.$`ls` instead of execa.
+- **Runtime**: Bun (not Node.js)
+- **Language**: TypeScript with ES modules
+- **Framework**: Mastra MCP framework
+- **SDKs**: 0G TypeScript SDK, 0G Serving Broker
 
-## Testing
+## Development Commands
 
-Use `bun test` to run tests.
+Always use Bun for development:
 
-```ts#index.test.ts
-import { test, expect } from "bun:test";
+- `bun run start` - Start the MCP server
+- `bun run dev` - Start with hot reload and auto-rebuild docs
+- `bun run build` - Build for production
+- `bun run prepare-docs` - Sync documentation from submodules
+- `bun install` - Install dependencies
 
-test("hello world", () => {
-  expect(1).toBe(1);
-});
+## Project Structure
+
+```
+src/
+├── index.ts              # Main MCP server setup
+├── stdio.ts              # Stdio transport for MCP clients
+├── config/               # Configuration modules
+│   ├── storage.ts        # Storage SDK config (RPC endpoints, contracts)
+│   └── compute.ts        # Compute SDK config
+├── tools/                # MCP tool implementations
+│   ├── docs.ts           # Documentation retrieval
+│   ├── examples.ts       # Code example extraction
+│   ├── storage/          # 0G Storage tools (upload, download, KV)
+│   └── compute/          # 0G Compute tools (list services)
+└── utils/                # Shared utilities
+    ├── logger.ts         # Logging
+    └── file-utils.ts     # File operations
 ```
 
-## Frontend
+## Key Conventions
 
-Use HTML imports with `Bun.serve()`. Don't use `vite`. HTML imports fully support React, CSS, Tailwind.
+### File Operations
+- Currently uses `fs/promises` from Node.js (e.g., `import fs from 'fs/promises'`)
+- Bun automatically loads `.env` files (no need for dotenv)
 
-Server:
+### Module System
+- Use ES modules (`import`/`export`)
+- Type imports: `import type { Thing } from "..."`
+- Set `"type": "module"` in package.json
 
-```ts#index.ts
-import index from "./index.html"
+### TypeScript
+- All source files are `.ts` (not `.js`)
+- Use Zod for runtime validation
+- Enable strict type checking
+- Use `Bun.build()` for bundling TypeScript
 
-Bun.serve({
-  routes: {
-    "/": index,
-    "/api/users/:id": {
-      GET: (req) => {
-        return new Response(JSON.stringify({ id: req.params.id }));
-      },
-    },
-  },
-  // optional websocket support
-  websocket: {
-    open: (ws) => {
-      ws.send("Hello, world!");
-    },
-    message: (ws, message) => {
-      ws.send(message);
-    },
-    close: (ws) => {
-      // handle close
-    }
-  },
-  development: {
-    hmr: true,
-    console: true,
-  }
-})
+### MCP Server Development
+- Use `@mastra/mcp` framework
+- Tools are defined with Zod schemas
+- Use structured logging with [src/utils/logger.ts](src/utils/logger.ts)
+- Follow async/await patterns
+
+### Environment Variables
+The project uses environment variables for configuration:
+- `OG_NETWORK` - Network selection (testnet/mainnet)
+- `OG_PRIVATE_KEY` - Private key for storage operations
+- `OG_EVM_RPC` - Custom EVM RPC endpoint
+- `OG_INDEXER_RPC` - Custom indexer endpoint
+- `REBUILD_DOCS_ON_START` - Auto-rebuild docs on startup
+- `LOG_LEVEL` - Logging level (info, debug, error)
+
+See [README.md](README.md) for full environment variable documentation.
+
+## Adding New MCP Tools
+
+1. Create a new file in `src/tools/` or `src/tools/<category>/`
+2. Define the tool using Mastra's MCP API with Zod schemas
+3. Register the tool in [src/index.ts](src/index.ts) tools object
+4. Test with: `bun run dev`
+
+See existing tools in `src/tools/` for reference implementation patterns.
+
+## Documentation Updates
+
+The project uses git submodules for 0g documentation:
+
+```bash
+# Initialize submodules (first time)
+git submodule update --init --recursive
+
+# Update to latest documentation
+cd lib/0g-docs
+git pull origin main
+cd ../..
+
+# Rebuild documentation index
+bun run prepare-docs
 ```
 
-HTML files can import .tsx, .jsx or .js files directly and Bun's bundler will transpile & bundle automatically. `<link>` tags can point to stylesheets and Bun's CSS bundler will bundle.
+## Debugging
 
-```html#index.html
-<html>
-  <body>
-    <h1>Hello, world!</h1>
-    <script type="module" src="./frontend.tsx"></script>
-  </body>
-</html>
-```
+- Enable debug logging: `LOG_LEVEL=debug bun run dev`
+- Use `console.log()` for debugging (Bun has excellent console support)
+- Check MCP connection: Restart your IDE or run `/mcp` command in Claude Code
 
-With the following `frontend.tsx`:
+## References
 
-```tsx#frontend.tsx
-import React from "react";
-
-// import .css files directly and it works
-import './index.css';
-
-import { createRoot } from "react-dom/client";
-
-const root = createRoot(document.body);
-
-export default function Frontend() {
-  return <h1>Hello, world!</h1>;
-}
-
-root.render(<Frontend />);
-```
-
-Then, run index.ts
-
-```sh
-bun --hot ./index.ts
-```
-
-For more information, read the Bun API docs in `node_modules/bun-types/docs/**.md`.
+- [Bun Documentation](https://bun.sh/docs)
+- [Mastra MCP Framework](https://mastra.ai)
+- [Model Context Protocol](https://modelcontextprotocol.io/)
+- [0G Documentation](https://docs.0g.ai)
+- [0G TypeScript SDK](https://github.com/0gfoundation/0g-ts-sdk)

@@ -1,6 +1,94 @@
-# 0g MCP Server
+# 0G MCP Server
 
-Model Context Protocol (MCP) server for accessing [0g.ai](https://0g.ai) documentation and code examples. Built with [Mastra MCP framework](https://mastra.ai) and [Bun](https://bun.com).
+Model Context Protocol (MCP) server for accessing [0G.AI](https://0g.ai) documentation and code examples. Built with [Mastra MCP framework](https://mastra.ai) and [Bun](https://bun.com).
+
+## What It Does - Quick Examples
+
+### 📚 Access 0G Documentation
+```typescript
+// Ask your AI: "Show me the 0G storage SDK getting started guide"
+// Uses: 0gDocs tool
+{
+  "paths": ["developer-hub/getting-started.md"],
+  "queryKeywords": ["sdk", "storage"]
+}
+```
+
+### 💾 Upload Files to 0G Storage
+```typescript
+// Ask your AI: "Upload this file to 0G storage"
+// Uses: 0gStorageUpload tool
+{
+  "filePath": "/path/to/document.pdf"
+}
+// Returns: { rootHash: "0xabc...", txHash: "0x123..." }
+```
+
+### 📥 Download from 0G Storage
+```typescript
+// Ask your AI: "Download file with hash 0xabc..."
+// Uses: 0gStorageDownload tool
+{
+  "rootHash": "0xabc...",
+  "outputPath": "/path/to/save/document.pdf"
+}
+```
+
+### 🗄️ Store Key-Value Data
+```typescript
+// Ask your AI: "Store user preferences in 0G KV store"
+// Uses: 0gKvSet tool
+{
+  "streamId": "0x1234...",
+  "data": [
+    { "key": "theme", "value": "dark" },
+    { "key": "language", "value": "en" }
+  ]
+}
+```
+
+### 🤖 List Available AI Services
+```typescript
+// Ask your AI: "What AI models are available on 0G Compute Network?"
+// Uses: 0gComputeListServices tool
+// Returns live services with pricing and TEE verification status
+```
+
+**Example Output:**
+```
+════════════════════════════════════════════════════════════════════════════════
+  0G COMPUTE NETWORK - AVAILABLE SERVICES
+════════════════════════════════════════════════════════════════════════════════
+
+┌─ Service 1
+│
+├─ Provider Address: 0xf07240Efa67755B5311bc75784a061eDB47165Dd
+├─ Model: phala/gpt-oss-120b
+├─ Service Type: chatbot
+├─ Endpoint: http://50.145.48.92:30081
+│
+├─ Pricing:
+│  ├─ Input Price:  1.00e-7 A0GI per token
+│  └─ Output Price: 4.00e-7 A0GI per token
+│
+├─ Verifiability: TeeML (Trusted Execution Environment)
+│
+├─ Last Updated: 2025-09-27T09:34:27.000Z
+└─
+
+Total Services: 4
+════════════════════════════════════════════════════════════════════════════════
+```
+
+### 📖 Extract Code Examples
+```typescript
+// Ask your AI: "Show me TypeScript examples for storage"
+// Uses: 0gExamples tool
+{
+  "category": "storage",
+  "language": "typescript"
+}
+```
 
 ## Features
 
