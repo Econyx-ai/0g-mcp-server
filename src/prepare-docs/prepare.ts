@@ -1,40 +1,40 @@
-import fs from 'fs/promises';
-import path from 'path';
-import { fromProjectRoot, log } from '../utils/file-utils.js';
+import fs from "node:fs/promises";
+import path from "node:path";
+import { fromProjectRoot, log } from "../utils/file-utils.js";
 
 const DOCS_SOURCES = [
   {
-    source: fromProjectRoot('lib/0g-docs/docs'),
-    dest: fromProjectRoot('.docs/raw')
+    source: fromProjectRoot("lib/0g-docs/docs"),
+    dest: fromProjectRoot(".docs/raw"),
   },
   {
-    source: fromProjectRoot('lib/0g-storage-node'),
-    dest: fromProjectRoot('.docs/raw/storage-node')
+    source: fromProjectRoot("lib/0g-storage-node"),
+    dest: fromProjectRoot(".docs/raw/storage-node"),
   },
   {
-    source: fromProjectRoot('lib/0g-storage-client'),
-    dest: fromProjectRoot('.docs/raw/storage-client')
+    source: fromProjectRoot("lib/0g-storage-client"),
+    dest: fromProjectRoot(".docs/raw/storage-client"),
   },
   {
-    source: fromProjectRoot('lib/0g-serving-broker'),
-    dest: fromProjectRoot('.docs/raw/serving-broker')
+    source: fromProjectRoot("lib/0g-serving-broker"),
+    dest: fromProjectRoot(".docs/raw/serving-broker"),
   },
   {
-    source: fromProjectRoot('lib/0g-serving-user-broker'),
-    dest: fromProjectRoot('.docs/raw/serving-user-broker')
+    source: fromProjectRoot("lib/0g-serving-user-broker"),
+    dest: fromProjectRoot(".docs/raw/serving-user-broker"),
   },
   {
-    source: fromProjectRoot('docs/0g-knowledge-base'),
-    dest: fromProjectRoot('.docs/raw/knowledge-base')
+    source: fromProjectRoot("docs/0g-knowledge-base"),
+    dest: fromProjectRoot(".docs/raw/knowledge-base"),
   },
   {
-    source: fromProjectRoot('lib/0g-serving-contract'),
-    dest: fromProjectRoot('.docs/raw/serving-contract')
+    source: fromProjectRoot("lib/0g-serving-contract"),
+    dest: fromProjectRoot(".docs/raw/serving-contract"),
   },
   {
-    source: fromProjectRoot('lib/0g-agent-nft'),
-    dest: fromProjectRoot('.docs/raw/agent-nft')
-  }
+    source: fromProjectRoot("lib/0g-agent-nft"),
+    dest: fromProjectRoot(".docs/raw/agent-nft"),
+  },
 ];
 
 async function copyDir(src: string, dest: string, skipDirs: string[] = []) {
@@ -56,7 +56,12 @@ async function copyDir(src: string, dest: string, skipDirs: string[] = []) {
     if (entry.isDirectory()) {
       // Recursively copy directories
       await copyDir(srcPath, destPath, skipDirs);
-    } else if (entry.isFile() && (entry.name.endsWith('.mdx') || entry.name.endsWith('.md') || entry.name.endsWith('.sol'))) {
+    } else if (
+      entry.isFile() &&
+      (entry.name.endsWith(".mdx") ||
+        entry.name.endsWith(".md") ||
+        entry.name.endsWith(".sol"))
+    ) {
       // Copy mdx, md, and sol files
       await fs.copyFile(srcPath, destPath);
     }
@@ -65,11 +70,11 @@ async function copyDir(src: string, dest: string, skipDirs: string[] = []) {
 
 export async function prepare() {
   try {
-    log('Preparing 0g documentation...');
+    log("Preparing 0g documentation...");
 
     // Clean up existing docs directory if it exists
     try {
-      await fs.rm(fromProjectRoot('.docs/raw'), { recursive: true });
+      await fs.rm(fromProjectRoot(".docs/raw"), { recursive: true });
     } catch {
       // Ignore if directory doesn't exist
     }
@@ -81,38 +86,87 @@ export async function prepare() {
 
       // Skip common non-doc directories
       let skipDirs: string[] = [];
-      if (sourceName === '0g-storage-node') {
-        skipDirs = ['node', 'common', 'tests', 'scripts', 'run', '.github', '.git', 'version-meld', 'storage-contracts-abis', '.gitbook'];
-      } else if (sourceName === '0g-storage-client') {
-        skipDirs = ['cmd', 'common', 'contract', 'core', 'gateway', 'indexer', 'kv', 'node', 'transfer', '.github', '.git'];
-      } else if (sourceName === '0g-serving-broker') {
-        skipDirs = ['.github', '.git'];
-      } else if (sourceName === '0g-serving-user-broker') {
-        skipDirs = ['docs', 'lib.commonjs', 'lib.esm', 'cli.commonjs', 'types', 'binary', 'token.counter', '.github', '.git'];
-      } else if (sourceName === '0g-knowledge-base') {
+      if (sourceName === "0g-storage-node") {
+        skipDirs = [
+          "node",
+          "common",
+          "tests",
+          "scripts",
+          "run",
+          ".github",
+          ".git",
+          "version-meld",
+          "storage-contracts-abis",
+          ".gitbook",
+        ];
+      } else if (sourceName === "0g-storage-client") {
+        skipDirs = [
+          "cmd",
+          "common",
+          "contract",
+          "core",
+          "gateway",
+          "indexer",
+          "kv",
+          "node",
+          "transfer",
+          ".github",
+          ".git",
+        ];
+      } else if (sourceName === "0g-serving-broker") {
+        skipDirs = [".github", ".git"];
+      } else if (sourceName === "0g-serving-user-broker") {
+        skipDirs = [
+          "docs",
+          "lib.commonjs",
+          "lib.esm",
+          "cli.commonjs",
+          "types",
+          "binary",
+          "token.counter",
+          ".github",
+          ".git",
+        ];
+      } else if (sourceName === "0g-knowledge-base") {
         skipDirs = []; // Include all custom documentation
-      } else if (sourceName === '0g-serving-contract') {
-        skipDirs = ['contracts', 'src', 'test', 'integrate', '.github', '.git', 'node_modules'];
-      } else if (sourceName === '0g-agent-nft') {
-        skipDirs = ['scripts', 'node_modules', 'cache', 'artifacts', 'typechain-types', '.github', '.git'];
+      } else if (sourceName === "0g-serving-contract") {
+        skipDirs = [
+          "contracts",
+          "src",
+          "test",
+          "integrate",
+          ".github",
+          ".git",
+          "node_modules",
+        ];
+      } else if (sourceName === "0g-agent-nft") {
+        skipDirs = [
+          "scripts",
+          "node_modules",
+          "cache",
+          "artifacts",
+          "typechain-types",
+          ".github",
+          ".git",
+        ];
       }
 
       await copyDir(source, dest, skipDirs);
       log(`✅ ${sourceName} files copied successfully`);
     }
 
-    log('✅ All documentation files copied successfully');
+    log("✅ All documentation files copied successfully");
   } catch (error) {
-    console.error('❌ Failed to copy documentation files:', error);
+    console.error("❌ Failed to copy documentation files:", error);
     throw error;
   }
 }
 
-if (process.env.PREPARE === 'true') {
+if (process.env.PREPARE === "true") {
   try {
     await prepare();
   } catch (error) {
-    console.error('Error preparing documentation:', error);
+    console.error("Error preparing documentation:", error);
     process.exit(1);
   }
 }

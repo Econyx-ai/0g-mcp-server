@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-import { writeErrorLog } from './utils/logger.js';
-import { runServer } from './index.js';
+import { runServer } from "./index.js";
+import { writeErrorLog } from "./utils/logger.js";
 
-runServer().catch(error => {
-  const errorMessage = 'Fatal error running server';
+runServer().catch((error) => {
+  const errorMessage = "Fatal error running server";
   console.error(errorMessage, error);
   writeErrorLog(errorMessage, {
     error:

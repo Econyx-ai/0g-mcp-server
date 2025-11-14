@@ -21,17 +21,17 @@
 // Network-specific configurations
 const NETWORKS = {
   testnet: {
-    evmRpc: 'https://evmrpc-testnet.0g.ai',
-    indexerRpc: 'https://indexer-storage-testnet-turbo.0g.ai',
-    kvUrl: 'http://3.101.147.150:6789',
-    flowContract: '0xb8F03061969da6Ad38f0a4a9f8a86bE71dA3c8E7',
+    evmRpc: "https://evmrpc-testnet.0g.ai",
+    indexerRpc: "https://indexer-storage-testnet-turbo.0g.ai",
+    kvUrl: "http://3.101.147.150:6789",
+    flowContract: "0xb8F03061969da6Ad38f0a4a9f8a86bE71dA3c8E7",
   },
   mainnet: {
-    evmRpc: 'https://evmrpc-mainnet.0g.ai',
-    indexerRpc: 'https://indexer-storage-mainnet.0g.ai',
-    kvUrl: 'http://mainnet-kv.0g.ai:6789', // Update with actual mainnet URL
-    flowContract: '0x0000000000000000000000000000000000000000', // Update with actual mainnet contract
-  }
+    evmRpc: "https://evmrpc-mainnet.0g.ai",
+    indexerRpc: "https://indexer-storage-mainnet.0g.ai",
+    kvUrl: "http://mainnet-kv.0g.ai:6789", // Update with actual mainnet URL
+    flowContract: "0x0000000000000000000000000000000000000000", // Update with actual mainnet contract
+  },
 } as const;
 
 type NetworkName = keyof typeof NETWORKS;
@@ -42,10 +42,10 @@ type NetworkName = keyof typeof NETWORKS;
  */
 function getCurrentNetwork(): NetworkName {
   const network = process.env.OG_NETWORK?.toLowerCase();
-  if (network === 'mainnet' || network === 'testnet') {
+  if (network === "mainnet" || network === "testnet") {
     return network;
   }
-  return 'testnet';
+  return "testnet";
 }
 
 // Get network configuration
@@ -98,7 +98,7 @@ export const storageConfig = {
  */
 export function getConfigValue<T>(
   paramValue: T | undefined,
-  defaultValue: T
+  defaultValue: T,
 ): T {
   return paramValue ?? defaultValue;
 }

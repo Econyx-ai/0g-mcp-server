@@ -1,6 +1,6 @@
-import fs from 'fs/promises';
-import path, { dirname } from 'path';
-import { fileURLToPath } from 'url';
+import fs from "node:fs/promises";
+import path, { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const mdFileCache = new Map<string, string[]>();
 
@@ -15,7 +15,10 @@ export const log = console.error;
 
 async function* walkMdFiles(dir: string): AsyncGenerator<string> {
   if (mdFileCache.has(dir)) {
-    for (const file of mdFileCache.get(dir)!) yield file;
+    const cachedFiles = mdFileCache.get(dir);
+    if (cachedFiles) {
+      for (const file of cachedFiles) yield file;
+    }
     return;
   }
   const filesInDir: string[] = [];
@@ -28,7 +31,10 @@ async function* walkMdFiles(dir: string): AsyncGenerator<string> {
         filesInDir.push(file);
         yield file;
       }
-    } else if (entry.isFile() && (entry.name.endsWith('.md') || entry.name.endsWith('.mdx'))) {
+    } else if (
+      entry.isFile() &&
+      (entry.name.endsWith(".md") || entry.name.endsWith(".mdx"))
+    ) {
       // For MD/MDX files, add to collection and yield
       filesInDir.push(fullPath);
       yield fullPath;
@@ -37,7 +43,10 @@ async function* walkMdFiles(dir: string): AsyncGenerator<string> {
   mdFileCache.set(dir, filesInDir);
 }
 
-async function searchDocumentContent(keywords: string[], baseDir: string): Promise<string[]> {
+async function searchDocumentContent(
+  keywords: string[],
+  baseDir: string,
+): Promise<string[]> {
   if (keywords.length === 0) return [];
 
   const fileScores = new Map<string, FileScore>();
@@ -45,16 +54,18 @@ async function searchDocumentContent(keywords: string[], baseDir: string): Promi
   for await (const filePath of walkMdFiles(baseDir)) {
     let content: string;
     try {
-      content = await fs.readFile(filePath, 'utf-8');
+      content = await fs.readFile(filePath, "utf-8");
     } catch {
       continue;
     }
-    const lines = content.split('\n');
-    lines.forEach(lineText => {
+    const lines = content.split("\n");
+    lines.forEach((lineText) => {
       const lowerLine = lineText.toLowerCase();
       for (const keyword of keywords) {
         if (lowerLine.includes(keyword.toLowerCase())) {
-          const relativePath = path.relative(baseDir, filePath).replace(/\\/g, '/');
+          const relativePath = path
+            .relative(baseDir, filePath)
+            .replace(/\\/g, "/");
           if (!fileScores.has(relativePath)) {
             fileScores.set(relativePath, {
               path: relativePath,
@@ -64,10 +75,13 @@ async function searchDocumentContent(keywords: string[], baseDir: string): Promi
               pathRelevance: calculatePathRelevance(relativePath, keywords),
             });
           }
-          const score = fileScores.get(relativePath)!;
+          const score = fileScores.get(relativePath);
+          if (!score) {
+            return;
+          }
           score.keywordMatches.add(keyword);
           score.totalMatches++;
-          if (lowerLine.includes('#') || lowerLine.includes('title')) {
+          if (lowerLine.includes("#") || lowerLine.includes("title")) {
             score.titleMatches++;
           }
         }
@@ -77,10 +91,14 @@ async function searchDocumentContent(keywords: string[], baseDir: string): Promi
 
   // Filter to only files that contain ALL keywords, then rank
   const validFiles = Array.from(fileScores.values())
-    .sort((a, b) => calculateFinalScore(b, keywords.length) - calculateFinalScore(a, keywords.length))
+    .sort(
+      (a, b) =>
+        calculateFinalScore(b, keywords.length) -
+        calculateFinalScore(a, keywords.length),
+    )
     .slice(0, 10); // Limit to top 10 results
 
-  return validFiles.map(score => score.path);
+  return validFiles.map((score) => score.path);
 }
 
 interface FileScore {
@@ -96,16 +114,17 @@ function calculatePathRelevance(filePath: string, keywords: string[]): number {
   const pathLower = filePath.toLowerCase();
 
   // Boost for common doc directories
-  if (pathLower.startsWith('docs/') || pathLower.startsWith('guide/')) relevance += 2;
+  if (pathLower.startsWith("docs/") || pathLower.startsWith("guide/"))
+    relevance += 2;
 
   // Boost if path contains any keywords
-  keywords.forEach(keyword => {
+  keywords.forEach((keyword) => {
     if (pathLower.includes(keyword.toLowerCase())) relevance += 3;
   });
 
   // Boost for high-value directories in 0g docs
-  const highValueDirs = ['storage', 'da', 'sdk', 'api', 'tutorial'];
-  if (highValueDirs.some(dir => pathLower.includes(dir))) {
+  const highValueDirs = ["storage", "da", "sdk", "api", "tutorial"];
+  if (highValueDirs.some((dir) => pathLower.includes(dir))) {
     relevance += 1;
   }
 
@@ -127,15 +146,15 @@ function extractKeywordsFromPath(path: string): string[] {
   // Get only the filename (last part of the path)
   const filename =
     path
-      .split('/')
+      .split("/")
       .pop() // Get last segment
-      ?.replace(/\.(mdx?|md)$/, '') || ''; // Remove file extension
+      ?.replace(/\.(mdx?|md)$/, "") || ""; // Remove file extension
 
   const keywords = new Set<string>();
 
   // Split on hyphens, underscores, camelCase
   const splitParts = filename.split(/[-_]|(?=[A-Z])/);
-  splitParts.forEach(keyword => {
+  splitParts.forEach((keyword) => {
     if (keyword.length > 2) {
       keywords.add(keyword.toLowerCase());
     }
@@ -145,23 +164,36 @@ function extractKeywordsFromPath(path: string): string[] {
 }
 
 function normalizeKeywords(keywords: string[]): string[] {
-  return Array.from(new Set(keywords.flatMap(k => k.split(/\s+/).filter(Boolean)).map(k => k.toLowerCase())));
+  return Array.from(
+    new Set(
+      keywords
+        .flatMap((k) => k.split(/\s+/).filter(Boolean))
+        .map((k) => k.toLowerCase()),
+    ),
+  );
 }
 
-export async function getMatchingPaths(path: string, queryKeywords: string[], baseDir: string): Promise<string> {
+export async function getMatchingPaths(
+  path: string,
+  queryKeywords: string[],
+  baseDir: string,
+): Promise<string> {
   const pathKeywords = extractKeywordsFromPath(path);
-  const allKeywords = normalizeKeywords([...pathKeywords, ...(queryKeywords || [])]);
+  const allKeywords = normalizeKeywords([
+    ...pathKeywords,
+    ...(queryKeywords || []),
+  ]);
 
   if (allKeywords.length === 0) {
-    return '';
+    return "";
   }
 
   const suggestedPaths = await searchDocumentContent(allKeywords, baseDir);
   if (suggestedPaths.length === 0) {
-    return '';
+    return "";
   }
 
-  const pathList = suggestedPaths.map(path => `- ${path}`).join('\n');
+  const pathList = suggestedPaths.map((path) => `- ${path}`).join("\n");
   return `Here are some paths that might be relevant based on your query:\n\n${pathList}`;
 }
 

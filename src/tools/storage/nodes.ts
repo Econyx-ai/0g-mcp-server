@@ -1,17 +1,23 @@
-import { Indexer } from '@0glabs/0g-ts-sdk';
-import { z } from 'zod';
-import { logger } from '../../utils/logger.js';
-import { storageConfig } from '../../config/storage.js';
+import { Indexer } from "@0glabs/0g-ts-sdk";
+import { z } from "zod";
+import { storageConfig } from "../../config/storage.js";
+import { logger } from "../../utils/logger.js";
 
 export const storageNodesInputSchema = z.object({
-  count: z.number().optional().describe('Number of storage nodes to select (default: 5)'),
-  indexerRpc: z.string().optional().describe(`Indexer RPC endpoint (default: ${storageConfig.indexerRpc})`)
+  count: z
+    .number()
+    .optional()
+    .describe("Number of storage nodes to select (default: 5)"),
+  indexerRpc: z
+    .string()
+    .optional()
+    .describe(`Indexer RPC endpoint (default: ${storageConfig.indexerRpc})`),
 });
 
 export type StorageNodesInput = z.infer<typeof storageNodesInputSchema>;
 
 export const storageNodesTool = {
-  name: '0gStorageNodes',
+  name: "0gStorageNodes",
   description: `Get information about available 0G Storage nodes.
 
     Returns:
@@ -28,7 +34,7 @@ export const storageNodesTool = {
     Get 10 nodes: count=10`,
   parameters: storageNodesInputSchema,
   execute: async (args: StorageNodesInput) => {
-    void logger.debug('Executing 0gStorageNodes tool', { args });
+    void logger.debug("Executing 0gStorageNodes tool", { args });
 
     try {
       const indexerRpc = args.indexerRpc || storageConfig.indexerRpc;
@@ -47,7 +53,7 @@ export const storageNodesTool = {
       }
 
       if (!nodes || nodes.length === 0) {
-        throw new Error('No storage nodes available');
+        throw new Error("No storage nodes available");
       }
 
       void logger.info(`Successfully selected ${nodes.length} nodes`);
@@ -59,18 +65,18 @@ export const storageNodesTool = {
           index: index + 1,
           url: node.url || node.toString(),
           // Add any other node properties that are available
-          ...node
+          ...node,
         })),
-        message: `Successfully retrieved ${nodes.length} storage nodes`
+        message: `Successfully retrieved ${nodes.length} storage nodes`,
       };
-
     } catch (error) {
-      void logger.error('Failed to execute 0gStorageNodes tool', error);
+      void logger.error("Failed to execute 0gStorageNodes tool", error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
-        message: 'Failed to retrieve storage nodes. Check error for details.'
+        error:
+          error instanceof Error ? error.message : "Unknown error occurred",
+        message: "Failed to retrieve storage nodes. Check error for details.",
       };
     }
-  }
+  },
 };

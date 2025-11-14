@@ -1,8 +1,8 @@
-import * as fs from 'fs';
-import * as os from 'os';
-import * as path from 'path';
-import type { MCPServer } from '@mastra/mcp';
-import type { LoggingLevel } from '@modelcontextprotocol/sdk/types.js';
+import * as fs from "node:fs";
+import * as os from "node:os";
+import * as path from "node:path";
+import type { MCPServer } from "@mastra/mcp";
+import type { LoggingLevel } from "@modelcontextprotocol/sdk/types.js";
 
 // Logger interface for type safety
 export interface Logger {
@@ -25,23 +25,23 @@ export const writeErrorLog = (message: string, data?: any) => {
   const logMessage = {
     timestamp,
     message,
-    ...(data ? (typeof data === 'object' ? data : { data }) : {}),
+    ...(data ? (typeof data === "object" ? data : { data }) : {}),
   };
 
   // Write to file
   try {
     // Ensure cache directory exists
-    const cacheDir = path.join(os.homedir(), '.cache', '0g', 'mcp-server-logs');
+    const cacheDir = path.join(os.homedir(), ".cache", "0g", "mcp-server-logs");
     fs.mkdirSync(cacheDir, { recursive: true });
 
     // Create log file path with timestamp
     const logFile = path.join(cacheDir, `${hourTimestamp}.log`);
 
     // Append log entry to file
-    fs.appendFileSync(logFile, JSON.stringify(logMessage) + '\n', 'utf8');
+    fs.appendFileSync(logFile, JSON.stringify(logMessage) + "\n", "utf8");
   } catch (err) {
     // If file writing fails, at least we still have stdout
-    console.error('Failed to write to log file:', err);
+    console.error("Failed to write to log file:", err);
   }
 };
 
@@ -57,36 +57,39 @@ export function createLogger(server?: MCPServer): Logger {
         level,
         data: {
           message,
-          ...(data ? (typeof data === 'object' ? data : { data }) : {}),
+          ...(data ? (typeof data === "object" ? data : { data }) : {}),
         },
       });
     } catch (error) {
       if (
         error instanceof Error &&
-        (error.message === 'Not connected' ||
-          error.message.includes('does not support logging') ||
-          error.message.includes('Connection closed'))
+        (error.message === "Not connected" ||
+          error.message.includes("does not support logging") ||
+          error.message.includes("Connection closed"))
       ) {
         return;
       }
-      console.error(`Failed to send ${level} log:`, error instanceof Error ? error.message : error);
+      console.error(
+        `Failed to send ${level} log:`,
+        error instanceof Error ? error.message : error,
+      );
     }
   };
 
   return {
     debug: async (message: string, data?: any) => {
-      if (process.env.DEBUG || process.env.NODE_ENV === 'development') {
-        await sendLog('debug', message, data);
+      if (process.env.DEBUG || process.env.NODE_ENV === "development") {
+        await sendLog("debug", message, data);
       }
     },
     info: async (message: string, data?: any) => {
-      await sendLog('info', message, data);
+      await sendLog("info", message, data);
     },
     notice: async (message: string, data?: any) => {
-      await sendLog('notice', message, data);
+      await sendLog("notice", message, data);
     },
     warning: async (message: string, data?: any) => {
-      await sendLog('warning', message, data);
+      await sendLog("warning", message, data);
     },
     error: async (message: string, error?: any) => {
       const errorData =
@@ -98,7 +101,7 @@ export function createLogger(server?: MCPServer): Logger {
             }
           : error;
       writeErrorLog(message, errorData);
-      await sendLog('error', message, errorData);
+      await sendLog("error", message, errorData);
     },
     critical: async (message: string, error?: any) => {
       const errorData =
@@ -110,7 +113,7 @@ export function createLogger(server?: MCPServer): Logger {
             }
           : error;
       writeErrorLog(message, errorData);
-      await sendLog('critical', message, errorData);
+      await sendLog("critical", message, errorData);
     },
     alert: async (message: string, error?: any) => {
       const errorData =
@@ -122,7 +125,7 @@ export function createLogger(server?: MCPServer): Logger {
             }
           : error;
       writeErrorLog(message, errorData);
-      await sendLog('alert', message, errorData);
+      await sendLog("alert", message, errorData);
     },
     emergency: async (message: string, error?: any) => {
       const errorData =
@@ -134,7 +137,7 @@ export function createLogger(server?: MCPServer): Logger {
             }
           : error;
       writeErrorLog(message, errorData);
-      await sendLog('emergency', message, errorData);
+      await sendLog("emergency", message, errorData);
     },
   };
 }

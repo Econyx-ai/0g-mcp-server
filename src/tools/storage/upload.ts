@@ -1,21 +1,35 @@
-import { ZgFile, Indexer } from '@0glabs/0g-ts-sdk';
-import { ethers } from 'ethers';
-import { z } from 'zod';
-import { logger } from '../../utils/logger.js';
-import { storageConfig } from '../../config/storage.js';
+import { Indexer, ZgFile } from "@0glabs/0g-ts-sdk";
+import { ethers } from "ethers";
+import { z } from "zod";
+import { storageConfig } from "../../config/storage.js";
+import { logger } from "../../utils/logger.js";
 
 export const storageUploadInputSchema = z.object({
-  filePath: z.string().describe('Absolute path to the file to upload'),
-  privateKey: z.string().optional().describe('Private key for signing transactions (optional if OG_PRIVATE_KEY env var is set)'),
-  evmRpc: z.string().optional().describe(`EVM RPC endpoint (default: ${storageConfig.evmRpc})`),
-  indexerRpc: z.string().optional().describe(`Indexer RPC endpoint (default: ${storageConfig.indexerRpc})`),
-  withMerkleTree: z.boolean().optional().describe('Include Merkle tree information in response (default: false)')
+  filePath: z.string().describe("Absolute path to the file to upload"),
+  privateKey: z
+    .string()
+    .optional()
+    .describe(
+      "Private key for signing transactions (optional if OG_PRIVATE_KEY env var is set)",
+    ),
+  evmRpc: z
+    .string()
+    .optional()
+    .describe(`EVM RPC endpoint (default: ${storageConfig.evmRpc})`),
+  indexerRpc: z
+    .string()
+    .optional()
+    .describe(`Indexer RPC endpoint (default: ${storageConfig.indexerRpc})`),
+  withMerkleTree: z
+    .boolean()
+    .optional()
+    .describe("Include Merkle tree information in response (default: false)"),
 });
 
 export type StorageUploadInput = z.infer<typeof storageUploadInputSchema>;
 
 export const storageUploadTool = {
-  name: '0gStorageUpload',
+  name: "0gStorageUpload",
   description: `Upload a file to 0G Storage network.
 
     Requirements:
@@ -33,13 +47,17 @@ export const storageUploadTool = {
     With Merkle tree: filePath="/path/to/file.txt", withMerkleTree=true`,
   parameters: storageUploadInputSchema,
   execute: async (args: StorageUploadInput) => {
-    void logger.debug('Executing 0gStorageUpload tool', { args: { ...args, privateKey: '***' } });
+    void logger.debug("Executing 0gStorageUpload tool", {
+      args: { ...args, privateKey: "***" },
+    });
 
     try {
       // Get private key from args or env
       const privateKey = args.privateKey || storageConfig.privateKey;
       if (!privateKey) {
-        throw new Error('Private key required. Provide via parameter or set OG_PRIVATE_KEY environment variable.');
+        throw new Error(
+          "Private key required. Provide via parameter or set OG_PRIVATE_KEY environment variable.",
+        );
       }
 
       // Setup provider and signer
@@ -81,7 +99,7 @@ export const storageUploadTool = {
         success: true,
         rootHash,
         txHash: tx,
-        message: 'File uploaded successfully to 0G Storage'
+        message: "File uploaded successfully to 0G Storage",
       };
 
       if (args.withMerkleTree && tree) {
@@ -92,14 +110,14 @@ export const storageUploadTool = {
       }
 
       return result;
-
     } catch (error) {
-      void logger.error('Failed to execute 0gStorageUpload tool', error);
+      void logger.error("Failed to execute 0gStorageUpload tool", error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
-        message: 'Upload failed. Check error for details.'
+        error:
+          error instanceof Error ? error.message : "Unknown error occurred",
+        message: "Upload failed. Check error for details.",
       };
     }
-  }
+  },
 };

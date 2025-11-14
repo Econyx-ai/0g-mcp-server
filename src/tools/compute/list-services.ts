@@ -1,12 +1,20 @@
-import { ethers } from 'ethers';
-import { createZGComputeNetworkBroker } from '@0glabs/0g-serving-broker';
-import { z } from 'zod';
-import { logger } from '../../utils/logger.js';
-import { computeConfig } from '../../config/compute.js';
+import { createZGComputeNetworkBroker } from "@0glabs/0g-serving-broker";
+import { ethers } from "ethers";
+import { z } from "zod";
+import { computeConfig } from "../../config/compute.js";
+import { logger } from "../../utils/logger.js";
 
 export const listServicesInputSchema = z.object({
-  evmRpc: z.string().optional().describe(`EVM RPC endpoint (default: ${computeConfig.evmRpc})`),
-  contractAddress: z.string().optional().describe('Serving contract address (optional, uses default if not provided)')
+  evmRpc: z
+    .string()
+    .optional()
+    .describe(`EVM RPC endpoint (default: ${computeConfig.evmRpc})`),
+  contractAddress: z
+    .string()
+    .optional()
+    .describe(
+      "Serving contract address (optional, uses default if not provided)",
+    ),
 });
 
 export type ListServicesInput = z.infer<typeof listServicesInputSchema>;
@@ -16,7 +24,7 @@ export type ListServicesInput = z.infer<typeof listServicesInputSchema>;
  */
 function formatPrice(priceWei: bigint): string {
   if (priceWei === 0n) {
-    return '0';
+    return "0";
   }
   // Convert from wei to OG (divide by 10^18)
   const ogTokens = ethers.formatEther(priceWei);
@@ -40,27 +48,27 @@ function formatTimestamp(timestamp: bigint): string {
  */
 function formatServicesOutput(services: any[]): string {
   if (services.length === 0) {
-    return 'No services available';
+    return "No services available";
   }
 
-  let output = '\n';
-  output += '═'.repeat(80) + '\n';
-  output += '  0G COMPUTE NETWORK - AVAILABLE SERVICES\n';
-  output += '═'.repeat(80) + '\n\n';
+  let output = "\n";
+  output += "═".repeat(80) + "\n";
+  output += "  0G COMPUTE NETWORK - AVAILABLE SERVICES\n";
+  output += "═".repeat(80) + "\n\n";
 
   services.forEach((service, index) => {
     output += `\n┌─ Service ${index + 1}\n`;
     output += `│\n`;
     output += `├─ Provider Address: ${service.provider}\n`;
-    output += `├─ Model: ${service.model || 'N/A'}\n`;
-    output += `├─ Service Type: ${service.serviceType || 'N/A'}\n`;
+    output += `├─ Model: ${service.model || "N/A"}\n`;
+    output += `├─ Service Type: ${service.serviceType || "N/A"}\n`;
     output += `├─ Endpoint: ${service.url}\n`;
     output += `│\n`;
     output += `├─ Pricing:\n`;
     output += `│  ├─ Input Price:  ${formatPrice(service.inputPrice)} A0GI per token\n`;
     output += `│  └─ Output Price: ${formatPrice(service.outputPrice)} A0GI per token\n`;
     output += `│\n`;
-    output += `├─ Verifiability: ${service.verifiability || 'None'}\n`;
+    output += `├─ Verifiability: ${service.verifiability || "None"}\n`;
 
     if (service.verifiability) {
       output += `│  └─ Type: ${service.verifiability} (Trusted Execution Environment)\n`;
@@ -70,15 +78,15 @@ function formatServicesOutput(services: any[]): string {
     output += `├─ Last Updated: ${formatTimestamp(service.updatedAt)}\n`;
 
     if (service.additionalInfo) {
-      output += `├─ Additional Info: ${service.additionalInfo.substring(0, 50)}${service.additionalInfo.length > 50 ? '...' : ''}\n`;
+      output += `├─ Additional Info: ${service.additionalInfo.substring(0, 50)}${service.additionalInfo.length > 50 ? "..." : ""}\n`;
     }
 
-    output += `└─${index === services.length - 1 ? '' : '─'.repeat(78)}\n`;
+    output += `└─${index === services.length - 1 ? "" : "─".repeat(78)}\n`;
   });
 
-  output += '\n' + '═'.repeat(80) + '\n';
+  output += "\n" + "═".repeat(80) + "\n";
   output += `Total Services: ${services.length}\n`;
-  output += '═'.repeat(80) + '\n';
+  output += "═".repeat(80) + "\n";
 
   return output;
 }
@@ -90,21 +98,21 @@ function formatServicesCompact(services: any[]): any[] {
   return services.map((service, index) => ({
     index: index + 1,
     provider: service.provider,
-    model: service.model || 'N/A',
-    serviceType: service.serviceType || 'N/A',
+    model: service.model || "N/A",
+    serviceType: service.serviceType || "N/A",
     endpoint: service.url,
     pricing: {
       input: `${formatPrice(service.inputPrice)} A0GI/token`,
-      output: `${formatPrice(service.outputPrice)} A0GI/token`
+      output: `${formatPrice(service.outputPrice)} A0GI/token`,
     },
-    verifiability: service.verifiability || 'None',
+    verifiability: service.verifiability || "None",
     lastUpdated: formatTimestamp(service.updatedAt),
-    additionalInfo: service.additionalInfo || ''
+    additionalInfo: service.additionalInfo || "",
   }));
 }
 
 export const listServicesTool = {
-  name: '0gComputeListServices',
+  name: "0gComputeListServices",
   description: `List all available AI services on the 0G Compute Network.
 
     Returns detailed information about each service including:
@@ -125,12 +133,12 @@ export const listServicesTool = {
     Custom RPC: evmRpc="https://custom-rpc-url"`,
   parameters: listServicesInputSchema,
   execute: async (args: ListServicesInput) => {
-    void logger.debug('Executing 0gComputeListServices tool', { args });
+    void logger.debug("Executing 0gComputeListServices tool", { args });
 
     try {
       const evmRpc = args.evmRpc || computeConfig.evmRpc;
 
-      void logger.info('Fetching available compute services...');
+      void logger.info("Fetching available compute services...");
 
       // Create a read-only provider (no private key needed for listing)
       const provider = new ethers.JsonRpcProvider(evmRpc);
@@ -143,7 +151,7 @@ export const listServicesTool = {
       // Initialize broker
       const broker = await createZGComputeNetworkBroker(
         dummyWallet,
-        args.contractAddress
+        args.contractAddress,
       );
 
       // List services
@@ -154,8 +162,9 @@ export const listServicesTool = {
           success: true,
           services: [],
           count: 0,
-          formatted: '\nNo services currently available on the 0G Compute Network.\n',
-          message: 'No services available'
+          formatted:
+            "\nNo services currently available on the 0G Compute Network.\n",
+          message: "No services available",
         };
       }
 
@@ -170,17 +179,17 @@ export const listServicesTool = {
         count: services.length,
         services: compactOutput,
         formatted: formattedOutput,
-        message: `Successfully retrieved ${services.length} service(s) from 0G Compute Network`
+        message: `Successfully retrieved ${services.length} service(s) from 0G Compute Network`,
       };
-
     } catch (error) {
-      void logger.error('Failed to execute 0gComputeListServices tool', error);
+      void logger.error("Failed to execute 0gComputeListServices tool", error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
-        message: 'Failed to list compute services. Check error for details.',
-        hint: 'Ensure the EVM RPC endpoint is accessible and the serving contract is deployed.'
+        error:
+          error instanceof Error ? error.message : "Unknown error occurred",
+        message: "Failed to list compute services. Check error for details.",
+        hint: "Ensure the EVM RPC endpoint is accessible and the serving contract is deployed.",
       };
     }
-  }
+  },
 };

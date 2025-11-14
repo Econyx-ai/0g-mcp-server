@@ -19,13 +19,13 @@
 // Network-specific configurations
 const NETWORKS = {
   testnet: {
-    evmRpc: 'https://evmrpc-testnet.0g.ai',
+    evmRpc: "https://evmrpc-testnet.0g.ai",
     servingContract: undefined, // Uses SDK default
   },
   mainnet: {
-    evmRpc: 'https://evmrpc-mainnet.0g.ai',
+    evmRpc: "https://evmrpc-mainnet.0g.ai",
     servingContract: undefined, // Uses SDK default
-  }
+  },
 } as const;
 
 type NetworkName = keyof typeof NETWORKS;
@@ -36,10 +36,10 @@ type NetworkName = keyof typeof NETWORKS;
  */
 function getCurrentNetwork(): NetworkName {
   const network = process.env.OG_NETWORK?.toLowerCase();
-  if (network === 'mainnet' || network === 'testnet') {
+  if (network === "mainnet" || network === "testnet") {
     return network;
   }
-  return 'testnet';
+  return "testnet";
 }
 
 // Get network configuration
@@ -60,7 +60,8 @@ export const computeConfig = {
    * Serving contract address
    * Override with OG_SERVING_CONTRACT environment variable
    */
-  servingContract: process.env.OG_SERVING_CONTRACT || networkConfig.servingContract,
+  servingContract:
+    process.env.OG_SERVING_CONTRACT || networkConfig.servingContract,
 
   /**
    * Private key for signing transactions
@@ -80,7 +81,7 @@ export const computeConfig = {
  */
 export function getConfigValue<T>(
   paramValue: T | undefined,
-  defaultValue: T
+  defaultValue: T,
 ): T {
   return paramValue ?? defaultValue;
 }
