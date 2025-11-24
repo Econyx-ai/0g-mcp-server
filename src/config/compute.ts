@@ -23,7 +23,7 @@ const NETWORKS = {
     servingContract: undefined, // Uses SDK default
   },
   mainnet: {
-    evmRpc: "https://evmrpc-mainnet.0g.ai",
+    evmRpc: "https://evmrpc.0g.ai",
     servingContract: undefined, // Uses SDK default
   },
 } as const;

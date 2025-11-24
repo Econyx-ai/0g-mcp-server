@@ -27,7 +27,7 @@ const NETWORKS = {
     flowContract: "0xb8F03061969da6Ad38f0a4a9f8a86bE71dA3c8E7",
   },
   mainnet: {
-    evmRpc: "https://evmrpc-mainnet.0g.ai",
+    evmRpc: "https://evmrpc.0g.ai",
     indexerRpc: "https://indexer-storage-mainnet.0g.ai",
     kvUrl: "http://mainnet-kv.0g.ai:6789", // Update with actual mainnet URL
     flowContract: "0x0000000000000000000000000000000000000000", // Update with actual mainnet contract
